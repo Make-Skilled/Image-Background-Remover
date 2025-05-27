@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Upload New Image</h2>
+        <form method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data" class="space-y-4">
+            <div class="flex items-center justify-center w-full">
+                <label for="image" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                        <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                        <p class="text-xs text-gray-500">PNG, JPG or JPEG (MAX. 10MB)</p>
+                    </div>
+                    <input id="image" name="image" type="file" class="hidden" accept="image/*" required />
+                </label>
+            </div>
+            <div class="flex justify-center">
+                <button type="submit"
+                    class="px-6 py-3 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Remove Background
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Your Images</h2>
+        {% if images %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for image in images %}
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Original</h3>
+                                <div class="aspect-w-16 aspect-h-9">
+                                    <img src="{{ url_for('static', filename='uploads/' + image.filename) }}" 
+                                        alt="Original image" 
+                                        class="object-cover rounded-lg">
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Processed</h3>
+                                <div class="aspect-w-16 aspect-h-9 bg-white">
+                                    <img src="{{ url_for('static', filename='uploads/' + image.processed_filename) }}" 
+                                        alt="Processed image" 
+                                        class="object-cover rounded-lg">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">{{ image.filename }}</span>
+                            <a href="{{ url_for('static', filename='uploads/' + image.processed_filename) }}" 
+                                download
+                                class="text-blue-500 hover:text-blue-600">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-8">
+                <i class="fas fa-images text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-600">No images processed yet. Upload your first image above!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Preview uploaded image
+    document.getElementById('image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.createElement('img');
+                preview.src = e.target.result;
+                preview.className = 'max-h-48 mx-auto mb-4';
+                
+                const container = document.querySelector('label[for="image"]');
+                const existingPreview = container.querySelector('img');
+                if (existingPreview) {
+                    container.removeChild(existingPreview);
+                }
+                container.insertBefore(preview, container.firstChild);
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %} 
